@@ -1,0 +1,172 @@
+# Cargoffer ZBE API — Full Reference for LLMs
+
+> By Cargoffer — https://cargoffer.com
+> Production API: https://zbe.transcend.cargoffer.com/api
+> Last updated: 2026-07-13
+
+This is the extended version of `llms.txt`. It contains every endpoint with all parameters, request/response examples, error codes, and integration patterns. For a quick overview, see [llms.txt](./llms.txt).
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Authentication](#authentication)
+3. [Coverage](#coverage)
+4. [API Endpoints](#api-endpoints)
+5. [MCP Server](#mcp-server)
+6. [Pricing](#pricing)
+7. [Compliance & Standards](#compliance--standards)
+
+---
+
+## Overview
+
+The ZBE API checks whether a route intersects with Low Emission Zones (ZBE in Spain, ZER in Portugal) using official polygon data.
+
+**Data sources:**
+- MITECO ESRI Feature Service: 62 ZBE polygons (official GeoJSON)
+- OpenStreetMap: 60+ ZBE via Overpass API
+- City CKAN portals: 15+ cities with open data
+
+**Algorithm:** Point-in-polygon check using the route's GPS points against each ZBE polygon. Returns intersections with restriction level and vehicle compliance.
+
+---
+
+## Authentication
+
+```bash
+Authorization: Bearer ***
+```
+
+Get your API key from `https://zbe.transcend.cargoffer.com/api` (free tier: 100 requests/day).
+
+---
+
+## Coverage
+
+### Spain 🇪🇸
+| City | Zone | Restriction |
+|------|------|-------------|
+| Madrid | Madrid 360 (Centro, Plaza Elíptica, Villaverde) | Distintivo DGT C mínimo |
+| Barcelona | ZBE Eix Ambiental | Distintivo DGT B mínimo |
+| Valencia | ZBE València | Euro 4 mínimo |
+| Sevilla | ZBE Sevilla | Euro 3 mínimo |
+| Málaga | ZBE Málaga | Euro 4 mínimo |
+
+62 polygons total from MITECO.
+
+### Portugal 🇵🇹
+| City | Zone | Restriction |
+|------|------|-------------|
+| Lisboa | ZER Lisboa | Euro 2 mínimo |
+| Porto | ZER Porto | Euro 2 mínimo |
+
+60+ zones via OpenStreetMap.
+
+---
+
+## API Endpoints
+
+### POST /api/zbe/check-route
+Check if a route intersects with any ZBE.
+
+**Request:**
+```json
+{
+  "route": [
+    { "lat": 40.4168, "lon": -3.7038 },
+    { "lat": 41.3874, "lon": 2.1686 }
+  ],
+  "vehicle": {
+    "fuel": "diesel",
+    "euroClass": 5,
+    "weight": 3500,
+    "dgtBadge": "C"
+  }
+}
+```
+
+**Response:**
+```json
+{
+  "intersections": [
+    {
+      "city": "Madrid",
+      "name": "Madrid 360",
+      "code": "ES-MAD-360",
+      "restrictionLevel": "C",
+      "compliant": false,
+      "entryPoint": { "lat": 40.4201, "lon": -3.7010 }
+    }
+  ],
+  "compliant": false,
+  "totalZones": 1
+}
+```
+
+### GET /api/zbe/polygons
+List all ZBE polygons with metadata.
+
+**Response:**
+```json
+{
+  "polygons": [
+    {
+      "id": "es-mad-360",
+      "city": "Madrid",
+      "name": "Madrid 360",
+      "country": "ES",
+      "geometry": { "type": "Polygon", "coordinates": [...] },
+      "restrictions": {
+        "minEuroClass": 3,
+        "allowedBadges": ["B", "C", "ECO", "0-EM"]
+      }
+    }
+  ]
+}
+```
+
+### GET /api/zbe/cities
+List cities with ZBE coverage.
+
+---
+
+## MCP Server
+
+```bash
+npx cargoffer-zbe-mcp
+```
+
+Tools:
+1. `check_route_compliance` — check if a route is ZBE-compliant
+2. `get_zbe_polygons` — list all polygons
+3. `get_vehicle_restrictions` — restrictions for a vehicle type
+4. `list_cities` — cities with ZBE
+5. `get_restriction_levels` — restriction levels by country
+
+---
+
+## Pricing
+
+- **Free tier**: 100 requests/day (no key via MCP)
+- **Basic**: 29 EUR/month — 10,000 checks
+- **Premium**: Contact for custom pricing
+
+---
+
+## Compliance & Standards
+
+- **MITECO**: official Spanish ZBE data source
+- **DGT**: distintivo ambiental validation
+- **GeoJSON**: EPSG:4326 coordinate system
+- **GDPR**: EU-hosted
+
+---
+
+## Support
+
+- Email: soporte@cargoffer.com
+- API Docs: https://zbe.transcend.cargoffer.com/api
+- Web: https://zbe.cargoffer.com
+- GitHub: https://github.com/cargoffer
