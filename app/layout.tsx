@@ -40,8 +40,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <script
           defer
-          src="https://umami.deploy.cargoffer.com/script.js"
-          data-website-id="b2f613a6-7f3e-4c8a-9b2d-4e7f8a1c3d5e"
+          src={process.env.NEXT_PUBLIC_UMAMI_SCRIPT_URL || 'https://umami.deploy.cargoffer.com/script.js'}
+          data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || '6582e22b-ec76-4f3f-b865-a66228c635eb'}
         />
         <meta
           httpEquiv="Content-Security-Policy"
