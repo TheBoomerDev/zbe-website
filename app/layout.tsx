@@ -59,6 +59,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         {children}
       </body>
+      {/* Umami Pixels — tracking para trazabilidad */}
+      <img src="https://umami.deploy.cargoffer.com/p/yj5vC5USt" style="border:0;width:0;height:0;display:none;" loading="lazy" alt=""/>
     </html>
   );
 }
